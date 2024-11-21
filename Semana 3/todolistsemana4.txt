@@ -1,0 +1,13 @@
+to do semana 4:
+
+main 00 e 01 -> mudaleds
+
+Revisar uso dos registradores no mudaleds
+
+main 10 e 11 -> animaleds
+
+Revisar uso dos registradores na animaleds
+
+main 20 e 21 -> cronometro
+
+fazer, testar e fé

@@ -1,3 +1,6 @@
+# Animação usando temporizador sem interrupção
+# Funcionando
+
 # Endereços
 .equ RED_LEDS, 0x10000000     # Endereço dos LEDs vermelhos
 .equ SWITCHES, 0x10000040     # Endereço dos switches
