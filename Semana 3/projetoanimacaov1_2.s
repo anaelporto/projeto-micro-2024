@@ -1,5 +1,5 @@
 # Animação usando temporizador sem interrupção
-# Funcionando e melhorado - semana 3
+# Funcionando e melhorado - Semana 3
 
 /*
 Registradores:

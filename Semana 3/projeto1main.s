@@ -1,4 +1,6 @@
 ###
+# Registradores utilizados e funcionalidades
+
 # r8 - ponteiro para a jtag uart
 # r9 - ponteiro para os leds vermelhos
 # r10 - aux / teste do caractere 0
@@ -10,6 +12,7 @@
 # r16 - aux / soma dos dig n
 # r17 - aux / dig 1
 # r18 - aux / dig 2
+
 ###
 
 .global _start
