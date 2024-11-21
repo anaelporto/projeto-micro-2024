@@ -1,6 +1,12 @@
 ###
 # r8 - ponteiro para a jtag uart
 # r9 - ponteiro para os leds vermelhos
+# r10 - aux / teste do caractere 0
+# r11 - aux / teste do caractere 1
+# r12 - aux / teste do caractere 2
+# r13 - leitura de caracteres
+# r14 - armazena o primeiro dígito lido
+# r15 - armazena o segundo dígito lido
 # r16 - aux / soma dos dig n
 # r17 - aux / dig 1
 # r18 - aux / dig 2
@@ -25,17 +31,17 @@ loop:
     # Lê o primeiro caractere (comando principal)
     ldwio   r13, 0(r8)          # Lê o primeiro caractere (comando)
     andi    r13, r13, 0xFF        # Máscara para manter os 8 bits
-    mov     r14, r13              # Armazena o primeiro dígito do comando em r7
+    mov     r14, r13              # Armazena o primeiro dígito do comando em r14
 
     # Lê o segundo caractere (comando específico)
     ldwio   r13, 0(r8)          # Lê o segundo caractere (comando específico)
     andi    r13, r13, 0xFF
-    mov     r15, r13              # Armazena o segundo dígito do comando em r8
+    mov     r15, r13              # Armazena o segundo dígito do comando em r15
 
     # Verifica o valor do primeiro caractere (seção)
-    beq     r14, r10, secao_0      # Se r7 == 0, redireciona para a seção 0
-    beq     r14, r11, secao_1      # Se r7 == 1, redireciona para a seção 1
-    beq     r14, r12, secao_2      # Se r7 == 2, redireciona para a seção 2
+    beq     r14, r10, secao_0      # Se r14 == 0, redireciona para a seção 0
+    beq     r14, r11, secao_1      # Se r14 == 1, redireciona para a seção 1
+    beq     r14, r12, secao_2      # Se r14 == 2, redireciona para a seção 2
 
     # Se o comando não for reconhecido, continua aguardando
     br loop
@@ -44,9 +50,9 @@ loop:
 
 secao_0:
     # Verifica o segundo caractere e redireciona para a função correta
-    beq     r15, r10, comando_00   # Se r8 == 0, acende o LED
-    beq     r15, r11, comando_01   # Se r8 == 1, apaga o LED
-    br loop                       # Se r8 não for 0 ou 1, aguarda novamente
+    beq     r15, r10, comando_00   # Se r15 == 0, acende o LED
+    beq     r15, r11, comando_01   # Se r15 == 1, apaga o LED
+    br loop                       # Se r15 não for 0 ou 1, aguarda novamente
 
 comando_00:  # Se o comando for '00', acende o LED
     # Lê o número do LED (dois caracteres seguintes)
@@ -76,7 +82,7 @@ comando_00:  # Se o comando for '00', acende o LED
     # Ajusta o número para o índice de 0 a 17 (para LEDs de 1 a 18)
     subi    r16, r16, 1         # Ajusta r16 para manter o número do LED de 0 a 17
 
-    # Desloca o bit para a posição correta (1 a 18) em r12
+    # Desloca o bit para a posição correta (1 a 18) em r17
     movi    r17, 1              # Carrega 1 em r17
     sll     r17, r17, r16        # Desloca 1 para a posição do LED correspondente
 
@@ -125,7 +131,7 @@ comando_01:  # Se o comando for '01', apaga o LED
     # Lê o valor atual dos LEDs
     ldwio   r16, 0(r9)          # Lê o valor atual dos LEDs (r16)
 
-    # Acende o LED (fazendo um bit OR com 1)
+    # Apaga o LED (fazendo um bit AND com 1)
     and     r16, r16, r17       # Apaga o LED correspondente ao bit
     stwio   r16, 0(r9)          # Escreve no endereço dos LEDs (acende o LED)
 
