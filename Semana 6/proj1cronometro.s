@@ -9,13 +9,21 @@ Endereços importantes:
 .org    0x1000
 _start:
     # Inicializa os registradores do contador e o stack pointer
-    movia   r2, 0          # Unidades
-    movia   r3, 0          # Dezenas
-    movia   r4, 0          # Centenas
-    movia   r5, 0          # Milhares
-    movi    r6, 10         # Limite para cada dígito
-    movia   r7, DISPLAY_BASE  # Endereço base do display
+    movia   r16, 0          # Unidades
+    movia   r17, 0          # Dezenas
+    movia   r18, 0          # Centenas
+    movia   r19, 0          # Milhares
+
+    movi    r20, 10         # Limite para cada dígito
+    
+    movia   r21, DISPLAY_BASE  # Endereço base do display
+    
     movia   sp, 0x2000       # Inicializa o stack pointer na RAM
+	
+	stbio   r0, 0(r21)      # Atualiza o display (unidades)
+	stbio   r0, 1(r21)      # Atualiza o display (unidades)
+	stbio   r0, 2(r21)      # Atualiza o display (unidades)
+	stbio   r0, 3(r21)      # Atualiza o display (unidades)
 
     subi    sp, sp, 4       # Reserva espaço na pilha
     stw     ra, 0(sp)       # Salva o registrador ra
@@ -26,207 +34,266 @@ main_loop:
 
 muda_unidades:    
     # Incrementa as unidades
-    addi    r2, r2, 1      
-    beq     r2, r6, muda_dezenas  # Vai para dezenas se unidades == 10
+    addi    r16, r16, 1      
+    beq     r16, r20, muda_dezenas  # Vai para dezenas se unidades == 10
 
     call    unidades_fim
 
     br      main_loop
 unidades_fim:
-    subi    sp, sp, 4       # Reserva espaço na pilha
+    subi    sp, sp, 16      # Reserva espaço na pilha
     stw     ra, 0(sp)       # Salva o registrador ra
+	stw		r21, 4(sp)		# Salva o callee-saved r21
+	stw		r22, 8(sp)		# Salva o callee-saved r22
+	stw		r23, 12(sp)		# Salva o callee-saved r23
 	
-    mov     r10, r2         
+	
+    mov     r23, r16         
     call    convert_to_7seg  # Converte o valor para 7 segmentos
-    movia   r7, DISPLAY_BASE  # Endereço base do display
-    stbio   r8, 0(r7)      # Atualiza o display (unidades)
+    movia   r21, DISPLAY_BASE  # Endereço base do display
+    stbio   r2, 0(r21)      # Atualiza o display (unidades)
 	
+    ldw 	r23, 12(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 8(sp)		# Restaura o callee-saved r22
+	ldw 	r21, 4(sp)		# Restaura o callee-saved r21
     ldw     ra, 0(sp)       # Restaura o registrador ra
-    addi    sp, sp, 4       # Libera espaço na pilha
+    addi    sp, sp, 16      # Libera espaço na pilha
+	
     ret
 
 muda_dezenas:
     # Incrementa as dezenas e reinicia as unidades
-    mov     r2, r0         
-    addi    r3, r3, 1      
-    beq     r3, r6, muda_centenas  # Vai para centenas se dezenas == 10
+    mov     r16, r0         
+    addi    r17, r17, 1      
+    beq     r17, r20, muda_centenas  # Vai para centenas se dezenas == 10
 
     call    dezenas_fim
 
     br      main_loop
 dezenas_fim:
-    subi    sp, sp, 4       # Reserva espaço na pilha
+    subi    sp, sp, 16      # Reserva espaço na pilha
     stw     ra, 0(sp)       # Salva o registrador ra
+	stw		r21, 4(sp)		# Salva o callee-saved r21
+	stw		r22, 8(sp)		# Salva o callee-saved r22
+	stw		r23, 12(sp)		# Salva o callee-saved r23
 
     call      unidades_fim
 
-    mov     r10, r3         
+    mov     r23, r17         
     call    convert_to_7seg  
-    movia   r7, DISPLAY_BASE  # Endereço base do display
-    addi    r7, r7, 1
-    stbio   r8, 0(r7)      # Atualiza o display (dezenas)
+    movia   r21, DISPLAY_BASE  # Endereço base do display
+    addi    r21, r21, 1
+    stbio   r2, 0(r21)     # Atualiza o display (dezenas)
     
+	ldw 	r23, 12(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 8(sp)		# Restaura o callee-saved r22
+	ldw 	r21, 4(sp)		# Restaura o callee-saved r21
     ldw     ra, 0(sp)       # Restaura o registrador ra
-    addi    sp, sp, 4       # Libera espaço na pilha
+    addi    sp, sp, 16      # Libera espaço na pilha
+	
     ret
 
 muda_centenas:
     # Incrementa as centenas e reinicia as dezenas
-    mov     r3, r0         
-    addi    r4, r4, 1      
-    beq     r4, r6, muda_milhares  # Vai para milhares se centenas == 10
+    mov     r17, r0         
+    addi    r18, r18, 1      
+    beq     r18, r20, muda_milhares  # Vai para milhares se centenas == 10
 
     call    centenas_fim
 
     br      main_loop
 centenas_fim:
-    subi    sp, sp, 4       # Reserva espaço na pilha
+    subi    sp, sp, 16      # Reserva espaço na pilha
     stw     ra, 0(sp)       # Salva o registrador ra
+	stw		r21, 4(sp)		# Salva o callee-saved r21
+	stw		r22, 8(sp)		# Salva o callee-saved r22
+	stw		r23, 12(sp)		# Salva o callee-saved r23
     
     call      dezenas_fim
 
-    mov     r10, r4         
+    mov     r23, r18         
     call    convert_to_7seg  
-    movia   r7, DISPLAY_BASE  # Endereço base do display
-    addi    r7, r7, 2
-    stbio   r8, 0(r7)      # Atualiza o display (centenas)
+    movia   r21, DISPLAY_BASE  # Endereço base do display
+    addi    r21, r21, 2
+    stbio   r2, 0(r21)      # Atualiza o display (centenas)
 
+    ldw 	r23, 12(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 8(sp)		# Restaura o callee-saved r22
+	ldw 	r21, 4(sp)		# Restaura o callee-saved r21
     ldw     ra, 0(sp)       # Restaura o registrador ra
-    addi    sp, sp, 4       # Libera espaço na pilha
+    addi    sp, sp, 16      # Libera espaço na pilha
+	
     ret
 
 muda_milhares:
     # Incrementa os milhares e reinicia as centenas
-    mov     r4, r0         
-    addi    r5, r5, 1      
-    beq     r5, r6, reinicia_contador  # Reinicia o contador se milhares == 10
+    mov     r18, r0         
+    addi    r19, r19, 1      
+    beq     r19, r20, reinicia_contador  # Reinicia o contador se milhares == 10
 
     call    milhares_fim
 
     br      main_loop
 milhares_fim:
-    subi    sp, sp, 4       # Reserva espaço na pilha
+    subi    sp, sp, 16      # Reserva espaço na pilha
     stw     ra, 0(sp)       # Salva o registrador ra
+	stw		r21, 4(sp)		# Salva o callee-saved r21
+	stw		r22, 8(sp)		# Salva o callee-saved r22
+	stw		r23, 12(sp)		# Salva o callee-saved r23
     
     call      centenas_fim
 
-    mov     r10, r5         
+    mov     r23, r19         
     call    convert_to_7seg
-    movia   r7, DISPLAY_BASE  # Endereço base do display
-    addi    r7, r7, 3
-    stbio   r8, 0(r7)     # Atualiza o display (milhares)
+    movia   r21, DISPLAY_BASE  # Endereço base do display
+    addi    r21, r21, 3
+    stbio   r2, 0(r21)     # Atualiza o display (milhares)
 
+    ldw 	r23, 12(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 8(sp)		# Restaura o callee-saved r22
+	ldw 	r21, 4(sp)		# Restaura o callee-saved r21
     ldw     ra, 0(sp)       # Restaura o registrador ra
-    addi    sp, sp, 4       # Libera espaço na pilha
+    addi    sp, sp, 16      # Libera espaço na pilha
     
     ret
 
 reinicia_contador:
     # Reinicia todos os valores
-    #mov     r5, r0
-    #stw     r0, 0(r7)
+    #mov     r19, r0
+    #stw     r0, 0(r21)
 
     br      main_loop
 
 # Função para esperar 1 segundo
 delay_1s:
-    subi    sp, sp, 4       # Reserva espaço na pilha
+    subi    sp, sp, 8       # Reserva espaço na pilha
     stw     ra, 0(sp)       # Salva o registrador ra
-    movia   r9, 3           # Configura o número de iterações do loop (ajustável)
+	stw 	r23, 4(sp)		# Salva o callee-saved r23 
+	
+    movia   r23, 2850000   # Configura o número de iterações do loop (ajustável)
 delay_loop:
-    subi    r9, r9, 1       # Decrementa o contador
-    bne     r9, r0, delay_loop  
+    subi    r23, r23, 1       # Decrementa o contador
+    bne     r23, r0, delay_loop  
+	
+	ldw		r23, 4(sp)
     ldw     ra, 0(sp)       # Restaura o registrador ra
-    addi    sp, sp, 4       # Libera espaço na pilha
+    addi    sp, sp, 8       # Libera espaço na pilha
     ret                     # Retorna para o chamador
 
 # Função para converter um valor para o código de 7 segmentos
 convert_to_7seg:
-    subi    sp, sp, 4       # Reserva espaço na pilha
-    stw     ra, 0(sp)       
-    andi    r8, r10, 0x0F   # Isola os 4 bits menos significativos
-    beq     r8, r0, DISP7_0
-    movi    r10, 1
-    beq     r8, r10, DISP7_1
-    movi    r10, 2
-    beq     r8, r10, DISP7_2
-    movi    r10, 3
-    beq     r8, r10, DISP7_3
-    movi    r10, 4
-    beq     r8, r10, DISP7_4
-    movi    r10, 5
-    beq     r8, r10, DISP7_5
-    movi    r10, 6
-    beq     r8, r10, DISP7_6
-    movi    r10, 7
-    beq     r8, r10, DISP7_7
-    movi    r10, 8
-    beq     r8, r10, DISP7_8
-    movi    r10, 9
-    beq     r8, r10, DISP7_9
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    subi    sp, sp, 12      # Reserva espaço na pilha
+    stw     ra, 0(sp)       # Salva o registrador ra
+	stw		r22, 4(sp)		# Salva o callee-saved r22
+	stw		r23, 8(sp)		# Salva o callee-saved r23 
+		
+    andi    r22, r23, 0x0F   # Isola os 4 bits menos significativos
+    beq     r22, r0, DISP7_0
+    movi    r23, 1
+    beq     r22, r23, DISP7_1
+    movi    r23, 2
+    beq     r22, r23, DISP7_2
+    movi    r23, 3
+    beq     r22, r23, DISP7_3
+    movi    r23, 4
+    beq     r22, r23, DISP7_4
+    movi    r23, 5
+    beq     r22, r23, DISP7_5
+    movi    r23, 6
+    beq     r22, r23, DISP7_6
+    movi    r23, 7
+    beq     r22, r23, DISP7_7
+    movi    r23, 8
+    beq     r22, r23, DISP7_8
+    movi    r23, 9
+    beq     r22, r23, DISP7_9 
+	
+	ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha
+	
     ret
 
 # Valores para o display de 7 segmentos
 DISP7_0:
-    movi    r8, 0x3F        # Código para '0'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x3F        # Código para '0'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha       
     ret
 
 DISP7_1:
-    movi    r8, 0x06        # Código para '1'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x06        # Código para '1'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha    
     ret
 
 DISP7_2:
-    movi    r8, 0x5B        # Código para '2'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x5B        # Código para '2'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha     
     ret
 
 DISP7_3:
-    movi    r8, 0x4F        # Código para '3'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x4F        # Código para '3'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha   
     ret
 
 DISP7_4:
-    movi    r8, 0x66        # Código para '4'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x66        # Código para '4'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha      
     ret
 
 DISP7_5:
-    movi    r8, 0x6D        # Código para '5'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x6D        # Código para '5'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha       
     ret
 
 DISP7_6:
-    movi    r8, 0x7D        # Código para '6'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x7D        # Código para '6'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha       
     ret
 
 DISP7_7:
-    movi    r8, 0x07        # Código para '7'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x07        # Código para '7'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha       
     ret
 
 DISP7_8:
-    movi    r8, 0x7F        # Código para '8'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x7F        # Código para '8'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha       
     ret
 
 DISP7_9:
-    movi    r8, 0x6F        # Código para '9'
-    ldw     ra, 0(sp)       
-    addi    sp, sp, 4       
+    movi    r2, 0x6F        # Código para '9'
+    ldw 	r23, 8(sp)		# Restaura o callee-saved r23
+	ldw 	r22, 4(sp)		# Restaura o callee-saved r22
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 12      # Libera espaço na pilha      
     ret
 
 CRONOMETRO_END:
