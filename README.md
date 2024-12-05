@@ -22,9 +22,9 @@ Metodologia:
 Desenvolvimento:
     Semanas 1 e 2: Durante as duas primeiras semanas, houve o foco na animação dos leds da placa, pois já havíamos trabalhado com a ativação dos LEDs antes e embora a animação fosse uma dificuldade a mais, ainda era a parte mais simples do projeto. Aproveitamos também para dar início a estruturação do arquivo principal, responsável pelo chamado de todas as funções que serão usadas neste projeto.
 
-        Fazer o LED funcionar não foi trabalhoso, mas acabamos levando mais tempo do que o previsto inicialmente pois sua animação acabou sendo mais trabalhosa do que esperado, temos a previsão de finalizá-la durante a próxima semana, mas como está envolvida com várias partes do projeto pode ser que seja necessário mais tempo.
+    Fazer o LED funcionar não foi trabalhoso, mas acabamos levando mais tempo do que o previsto inicialmente pois sua animação acabou sendo mais trabalhosa do que esperado, temos a previsão de finalizá-la durante a próxima semana, mas como está envolvida com várias partes do projeto pode ser que seja necessário mais tempo.
 
-        Fizemos também a maior parte da Uart, já que seu código estava praticamente pronto devido a sua implementação em aula, só precisamos deixar parte de sua implementação no aguardo.
+    Fizemos também a maior parte da Uart, já que seu código estava praticamente pronto devido a sua implementação em aula, só precisamos deixar parte de sua implementação no aguardo.
 
     Semana 3: Durante essa semana foram atualizados os códigos para a animação dos LEDs e do arquivo main, como nessa semana o grupo no geral teve dificuldades com o tempo, preferimos refinar o que já havia sido feito até então, ao invés de iniciar outra parte do projeto.
 
