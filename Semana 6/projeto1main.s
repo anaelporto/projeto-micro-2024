@@ -1,5 +1,6 @@
 /*
-Função principal que exibe o prompt na uart e chama as outras funções
+Função principal que exibe o prompt na UART e chama as outras funções
+Deve solicitar uma entrada e armazenar no buffer
 Como é caller, aqui deve-se usar os registradores r8-r15
 
 Funcionando e melhorada - Semana 6

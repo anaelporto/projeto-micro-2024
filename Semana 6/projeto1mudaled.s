@@ -1,7 +1,10 @@
-# Mudança no estado de um LED vermelho
-# Funcionando, isolado e melhorado - Semana 4
+/*
+Mudança no estado de um LED vermelho
+Como é callee, aqui deve-se usar os registradores r16-r23
+Se atuar como caller, deve-se salvar os valores de r16-r23
 
-/* 
+Funcionando, isolado e melhorado - Semana 4
+
 Registradores utilizados e funcionalidades:
 
 r16 - ponteiro para a jtag uart
