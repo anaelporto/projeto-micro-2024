@@ -1,14 +1,30 @@
-/************************************************************************** 
-Endereços importantes:
-7-seg: 0x10000020
-***************************************************************************/
+/*
+Cronômetro que é exibido no display de 7 segmentos
+Como é callee, aqui deve-se usar os registradores r16-r23
+Se atuar como caller, deve-se salvar os valores de r16-r23
+
+Funcionando, isolada e melhorada - Semana 6
+
+Registradores utilizados e funcionalidades:
+
+r16 - Representa as unidades do cronômetro
+r17 - Representa as dezenas do cronômetro
+r18 - Representa as centenas do cronômetro
+r19 - Representa os milhares do cronômetro
+r20 - Representa o limite de 10 para cada componente do cronômetro
+r21 - 
+r22 - 
+r23 - 
+
+*/
 .global _start
 
 .equ    DISPLAY_BASE,       0x10000020    # Endereço base do display de 7 segmentos
 
 .org    0x1000
 _start:
-    # Inicializa os registradores do contador e o stack pointer
+
+    # Inicializa os registradores do cronômetro e o stack pointer
     movia   r16, 0          # Unidades
     movia   r17, 0          # Dezenas
     movia   r18, 0          # Centenas
@@ -29,6 +45,9 @@ _start:
     stw     ra, 0(sp)       # Salva o registrador ra
 
 main_loop:
+    # Representa interrupção caso receba sinal de parada
+    bne r4, r0, CRONOMETRO_END         
+
     # Espera aproximadamente 1 segundo
     call    delay_1s       
 
@@ -129,7 +148,7 @@ muda_milhares:
     # Incrementa os milhares e reinicia as centenas
     mov     r18, r0         
     addi    r19, r19, 1      
-    beq     r19, r20, reinicia_contador  # Reinicia o contador se milhares == 10
+    beq     r19, r20, reinicia_contador  # Reinicia o cronômetro se milhares == 10
 
     call    milhares_fim
 

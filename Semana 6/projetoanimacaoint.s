@@ -1,7 +1,10 @@
-# Animação usando temporizador com interrupção
-# Funcionando, isolado e melhorado - Semana 6
-
 /*
+Animação usando temporizador com interrupção
+Como é callee, aqui deve-se usar os registradores r16-r23
+Se atuar como caller, deve-se salvar os valores de r16-r23
+
+Funcionando, isolada e melhorada - Semana 6
+
 Registradores utilizados e funcionalidades:
 
 r16 - armazena ponteiro que recebe o endereço dos switches
@@ -21,7 +24,7 @@ r22 - variável auxiliar para testar os limites inferior e superior
 
 # Constantes para temporizador
 .equ FREQUENCY, 270000000          # Frequência do sistema em Hz
-.equ DELAY_MS, 60                 # Atraso em milissegundos (testado na placa, gera aprox 200 ms de delay)
+.equ DELAY_MS, 200                 # Atraso em milissegundos (testado na placa, gera aprox 200 ms de delay)
 .equ TICKS, (FREQUENCY / 1000) * DELAY_MS # Ticks para 200ms
 
 .equ TICKS2, (FREQUENCY / 5)	# Ticks para 200ms
@@ -74,7 +77,7 @@ EXT_IRQ1:
     
 */
 ANIMALEDS:
-
+    
 	# Configurando o temporizador
  	movia	r16,	TIMER
 	movia	r17,	TICKS2	# 1/5 segundos
@@ -162,7 +165,8 @@ ANIMALEDS_INTERRUPT:
     addi    r17,    r0, 1
  	stwio	r17,	0(r16)	#	0x10002000 - valor baixo
 
-    bne r4, r0, end                 # Representa implementação em memória caso receba sinal de parada
+    # Representa interrupção caso receba sinal de parada
+    bne r4, r0, end                 
 
     movia r17, RED_LEDS			    # Inicializando LEDs
     ldwio r20, 0(r17)               # Lê o estado dos leds
