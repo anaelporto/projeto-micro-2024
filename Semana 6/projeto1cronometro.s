@@ -17,12 +17,45 @@ r22 -
 r23 - 
 
 */
-.global _start
 
 .equ    DISPLAY_BASE,       0x10000020    # Endereço base do display de 7 segmentos
 
-.org    0x1000
-_start:
+# Área de interrupções
+.org    0x300
+RTI:
+    rdctl   et,     ipending
+    beq     et,     r0,     OTHER_EXCEPTIONS
+    subi    ea,     ea,     4
+
+    # Tratamento
+
+ 	# Confere se a interrupção é do timer
+  	andi	r22,	et,	0b1
+	beq		r22,	r0,	OTHER_INTERRUPTS	# mudar para lidar com outros tipos de interrupção
+	call	ANIMALEDS_INTERRUPT
+ 	br		END_HANDLER		# avaliar se os dados estão sendo devidamente recuperados
+ 
+    # Fim tratamento
+
+    andi    r22,    et,     2
+    beq     r22,    r0,     OTHER_INTERRUPTS
+    # call  EXT_IRQ1
+OTHER_INTERRUPTS:
+    br      END_HANDLER
+OTHER_EXCEPTIONS:
+
+END_HANDLER:
+    eret
+
+.org    0x400
+EXT_IRQ1:
+    ret
+
+.org    0x1500
+
+.global CRONOMETRO
+
+CRONOMETRO:
 
     # Inicializa os registradores do cronômetro e o stack pointer
     movia   r16, 0          # Unidades
@@ -34,7 +67,7 @@ _start:
     
     movia   r21, DISPLAY_BASE  # Endereço base do display
     
-    movia   sp, 0x2000       # Inicializa o stack pointer na RAM
+    movia   sp, 0x3000       # Inicializa o stack pointer na RAM
 	
 	stbio   r0, 0(r21)      # Atualiza o display (unidades)
 	stbio   r0, 1(r21)      # Atualiza o display (unidades)

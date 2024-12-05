@@ -18,10 +18,12 @@ r15 - armazena o segundo dígito lido
 
 */
 
-.global _start
-
 # Endereço base da JTAG UART e dos LEDs
 .equ JTAG_UART_BASE, 0x10001000
+
+.org    0x500
+
+.global _start
 
 _start:
     # Inicializa o ponteiro para o endereço da JTAG UART

@@ -23,14 +23,11 @@ r22 - variável auxiliar para testar os limites inferior e superior
 .equ TIMER,		0X10002000	# Endereço do temporizador
 
 # Constantes para temporizador
-.equ FREQUENCY, 270000000          # Frequência do sistema em Hz
-.equ DELAY_MS, 200                 # Atraso em milissegundos (testado na placa, gera aprox 200 ms de delay)
-.equ TICKS, (FREQUENCY / 1000) * DELAY_MS # Ticks para 200ms
-
-.equ TICKS2, (FREQUENCY / 5)	# Ticks para 200ms
+.equ FREQUENCY, 500000000          # Frequência do sistema em Hz
+.equ TICKS, (FREQUENCY / 5)        # Ticks para 200ms
 
 # Área de interrupções
-.org    0x20
+.org    0x100
 RTI:
     rdctl   et,     ipending
     beq     et,     r0,     OTHER_EXCEPTIONS
@@ -57,12 +54,13 @@ END_HANDLER:
     eret
 
 
-.org    0x100
+.org    0x200
 EXT_IRQ1:
     ret
 
 
-.org    0x500
+.org    0x1000
+
 .global ANIMALEDS
 
 /*
@@ -77,10 +75,11 @@ EXT_IRQ1:
     
 */
 ANIMALEDS:
-    
+    movia   sp, 0x4000
+
 	# Configurando o temporizador
  	movia	r16,	TIMER
-	movia	r17,	TICKS2	# 1/5 segundos
+	movia	r17,	TICKS	# 1/5 segundos
  	stwio	r17,	8(r16)	#	0x10002008 - valor baixo
   	srli	r17,	r17,	16
 	stwio	r17,	12(r16)	#	0x1000200C - valor alto

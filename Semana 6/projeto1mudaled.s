@@ -19,6 +19,8 @@ r20 - armazena segunda leitura de r18
 .equ JTAG_UART_BASE, 0x10001000
 .equ RED_LEDS, 0x10000000  # Endereço para controlar os LEDs (18 LEDs)
 
+.org    0x2000
+
 .global MUDALEDS
 
 MUDALEDS:
