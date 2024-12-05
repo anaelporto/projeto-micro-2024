@@ -17,6 +17,9 @@ _start:
     movia   r7, DISPLAY_BASE  # Endereço base do display
     movia   sp, 0x2000       # Inicializa o stack pointer na RAM
 
+    subi    sp, sp, 4       # Reserva espaço na pilha
+    stw     ra, 0(sp)       # Salva o registrador ra
+
 main_loop:
     # Espera aproximadamente 1 segundo
     call    delay_1s       
@@ -25,48 +28,104 @@ muda_unidades:
     # Incrementa as unidades
     addi    r2, r2, 1      
     beq     r2, r6, muda_dezenas  # Vai para dezenas se unidades == 10
-unidades_fim:
-    mov     r11, r2         
-    call    convert_to_7seg  # Converte o valor para 7 segmentos
-    stwio   r8, 0(r7)      # Atualiza o display (unidades)
+
+    call    unidades_fim
+
     br      main_loop
+unidades_fim:
+    subi    sp, sp, 4       # Reserva espaço na pilha
+    stw     ra, 0(sp)       # Salva o registrador ra
+	
+    mov     r10, r2         
+    call    convert_to_7seg  # Converte o valor para 7 segmentos
+    movia   r7, DISPLAY_BASE  # Endereço base do display
+    stbio   r8, 0(r7)      # Atualiza o display (unidades)
+	
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 4       # Libera espaço na pilha
+    ret
 
 muda_dezenas:
     # Incrementa as dezenas e reinicia as unidades
     mov     r2, r0         
     addi    r3, r3, 1      
     beq     r3, r6, muda_centenas  # Vai para centenas se dezenas == 10
+
+    call    dezenas_fim
+
+    br      main_loop
 dezenas_fim:
-    mov     r11, r3         
+    subi    sp, sp, 4       # Reserva espaço na pilha
+    stw     ra, 0(sp)       # Salva o registrador ra
+
+    call      unidades_fim
+
+    mov     r10, r3         
     call    convert_to_7seg  
-    stwio   r8, 4(r7)      # Atualiza o display (dezenas)
-    br      unidades_fim
+    movia   r7, DISPLAY_BASE  # Endereço base do display
+    addi    r7, r7, 1
+    stbio   r8, 0(r7)      # Atualiza o display (dezenas)
+    
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 4       # Libera espaço na pilha
+    ret
 
 muda_centenas:
     # Incrementa as centenas e reinicia as dezenas
     mov     r3, r0         
     addi    r4, r4, 1      
     beq     r4, r6, muda_milhares  # Vai para milhares se centenas == 10
+
+    call    centenas_fim
+
+    br      main_loop
 centenas_fim:
-    mov     r11, r4         
+    subi    sp, sp, 4       # Reserva espaço na pilha
+    stw     ra, 0(sp)       # Salva o registrador ra
+    
+    call      dezenas_fim
+
+    mov     r10, r4         
     call    convert_to_7seg  
-    stwio   r8, 8(r7)      # Atualiza o display (centenas)
-    br      dezenas_fim
+    movia   r7, DISPLAY_BASE  # Endereço base do display
+    addi    r7, r7, 2
+    stbio   r8, 0(r7)      # Atualiza o display (centenas)
+
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 4       # Libera espaço na pilha
+    ret
 
 muda_milhares:
     # Incrementa os milhares e reinicia as centenas
     mov     r4, r0         
     addi    r5, r5, 1      
     beq     r5, r6, reinicia_contador  # Reinicia o contador se milhares == 10
+
+    call    milhares_fim
+
+    br      main_loop
 milhares_fim:
-    mov     r11, r5         
-    call    convert_to_7seg  
-    stwio   r8, 12(r7)     # Atualiza o display (milhares)
-    br      centenas_fim
+    subi    sp, sp, 4       # Reserva espaço na pilha
+    stw     ra, 0(sp)       # Salva o registrador ra
+    
+    call      centenas_fim
+
+    mov     r10, r5         
+    call    convert_to_7seg
+    movia   r7, DISPLAY_BASE  # Endereço base do display
+    addi    r7, r7, 3
+    stbio   r8, 0(r7)     # Atualiza o display (milhares)
+
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 4       # Libera espaço na pilha
+    
+    ret
 
 reinicia_contador:
     # Reinicia todos os valores
-    mov     r5, r0         
+    #mov     r5, r0
+    #stw     r0, 0(r7)
+
     br      main_loop
 
 # Função para esperar 1 segundo
@@ -85,7 +144,7 @@ delay_loop:
 convert_to_7seg:
     subi    sp, sp, 4       # Reserva espaço na pilha
     stw     ra, 0(sp)       
-    andi    r8, r11, 0x0F   # Isola os 4 bits menos significativos
+    andi    r8, r10, 0x0F   # Isola os 4 bits menos significativos
     beq     r8, r0, DISP7_0
     movi    r10, 1
     beq     r8, r10, DISP7_1
@@ -171,4 +230,7 @@ DISP7_9:
     ret
 
 CRONOMETRO_END:
+    ldw     ra, 0(sp)       # Restaura o registrador ra
+    addi    sp, sp, 4       # Libera espaço na pilha
+
     ret
