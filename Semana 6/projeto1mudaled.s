@@ -3,7 +3,7 @@ Mudança no estado de um LED vermelho
 Como é callee, aqui deve-se usar os registradores r16-r23
 Se atuar como caller, deve-se salvar os valores de r16-r23
 
-Funcionando, isolado e melhorado - Semana 4
+Funcionando, isolada e melhorada - Semana 6
 
 Registradores utilizados e funcionalidades:
 
