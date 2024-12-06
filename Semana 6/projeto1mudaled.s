@@ -3,7 +3,7 @@ Mudança no estado de um LED vermelho
 Como é callee, aqui deve-se usar os registradores r16-r23
 Se atuar como caller, deve-se salvar os valores de r16-r23
 
-Funcionando, isolada e melhorada - Semana 6
+Funcionando, integrada e melhorada - Semana 6
 
 Registradores utilizados e funcionalidades:
 
@@ -19,7 +19,7 @@ r20 - armazena segunda leitura de r18
 .equ JTAG_UART_BASE, 0x10001000
 .equ RED_LEDS, 0x10000000  # Endereço para controlar os LEDs (18 LEDs)
 
-.org    0x2000
+.org    0x1000
 
 .global MUDALEDS
 

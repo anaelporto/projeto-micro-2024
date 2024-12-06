@@ -18,12 +18,12 @@ r15 - armazena o segundo dígito lido
 
 */
 
-# Endereço base da JTAG UART e dos LEDs
-.equ JTAG_UART_BASE, 0x10001000
-
 .org    0x500
 
 .global _start
+
+# Endereço base da JTAG UART e dos LEDs
+.equ JTAG_UART_BASE, 0x10001000
 
 _start:
     # Inicializa o ponteiro para o endereço da JTAG UART
@@ -33,55 +33,76 @@ _start:
     movi    r11, 0x31      # Caractere '1'
     movi    r12, 0x32      # Caractere '2'
   
-    br menu
 loop:
     # Lê o primeiro caractere (comando principal)
     ldwio   r13, 0(r8)          # Lê o primeiro caractere (comando)
-    andi    r13, r13, 0xFF        # Máscara para manter os 8 bits
-    mov     r14, r13              # Armazena o primeiro dígito do comando em r14
 
+    andi    r16, r13, 0x8000
+    beq     r16, r0, loop
+
+    andi    r13, r13, 0xFF        # Máscara para manter os 8 bits
+
+
+    mov     r14, r13              # Armazena o primeiro dígito do comando em r14
+loop2:
     # Lê o segundo caractere (comando específico)
     ldwio   r13, 0(r8)          # Lê o segundo caractere (comando específico)
+    
+    andi    r16, r13, 0x8000
+    beq     r16, r0, loop2
+
+
     andi    r13, r13, 0xFF
     mov     r15, r13              # Armazena o segundo dígito do comando em r15
-
-    # Verifica se a segunda entrada é menor que 0 ou maior que 1
-    subi    r9, r15, 1         # Subtrai 1 de r15 e salva em r9
-    blt     r9, r0, menu       # Testa r9 e se for menor que 0 não faz nada
-    bgt     r9, r0, menu       # Testa r9 e se for maior que 0 não faz nada
 
     # Armazena o segundo valor para determinar a ação
     subi r4, r15, 0x30
 
     # Verifica o valor do primeiro caractere (seção)
-    beq     r14, r10, comando_0X      # Se r14 == 0, redireciona para a seção 0
-    beq     r14, r11, comando_1X      # Se r14 == 1, redireciona para a seção 1
-    beq     r14, r12, comando_2X      # Se r14 == 2, redireciona para a seção 2
+    beq     r14, r10, secao_0      # Se r14 == 0, redireciona para a seção 0
+    beq     r14, r11, secao_1      # Se r14 == 1, redireciona para a seção 1
+    beq     r14, r12, secao_2      # Se r14 == 2, redireciona para a seção 2
 
     # Se o comando não for reconhecido, continua aguardando
-    br menu
+    br loop
 
 # Seção 1: Comandos de controle de LEDs (Entrada 0)
 
-comando_0X:  # Se o comando for '0X', acende ou apaga o LED
+secao_0:
+    # Verifica o segundo caractere e redireciona para a função correta
+    
+    beq     r15, r10, comando_0X   # Se r15 == 0, acende o LED
+    beq     r15, r11, comando_0X   # Se r15 == 1, apaga o LED
+
+    br loop                       # Se r15 não for 0 ou 1, aguarda novamente
+
+comando_0X:  # Se o comando for '00', acende o LED
     call MUDALEDS
 
     br loop
 
 # Seção 2: Comandos de animação (Entrada 1)
 
-comando_1X:  
+secao_1:
+    beq     r15, r10, comando_1X   # Se r15 == 0, inicia a animação
+    beq     r15, r11, comando_1X   # Se r15 == 1, para a animação
+    
+    br loop                       # Se r15 não for 0 ou 1, aguarda novamente
+
+comando_1X:  # Se o comando for '10', acende o LED
     call ANIMALEDS
 
     br loop
 
 # Seção 3: Comandos de cronômetro (Entrada 2)
+secao_2:
+    beq     r15, r10, comando_2X   # Se r15 == 0, inicia o cronometro
+    beq     r15, r11, comando_2X   # Se r15 == 1, encerra o cronometro
+    
+    br loop                       # Se r15 não for 0 ou 1, aguarda novamente
 
 comando_2X:  # Se o comando for '20', acende o LED
-    call CRONOMETRO
 
-    br loop
-
-menu:
+    # call cronometro
 
     br loop

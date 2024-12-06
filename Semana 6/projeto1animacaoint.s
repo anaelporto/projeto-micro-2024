@@ -3,7 +3,7 @@ Animação usando temporizador com interrupção
 Como é callee, aqui deve-se usar os registradores r16-r23
 Se atuar como caller, deve-se salvar os valores de r16-r23
 
-Funcionando, isolada e melhorada - Semana 6
+Funcionando, integrada e melhorada - Semana 6
 
 Registradores utilizados e funcionalidades:
 
@@ -23,11 +23,11 @@ r22 - variável auxiliar para testar os limites inferior e superior
 .equ TIMER,		0X10002000	# Endereço do temporizador
 
 # Constantes para temporizador
-.equ FREQUENCY, 500000000          # Frequência do sistema em Hz
-.equ TICKS, (FREQUENCY / 5)        # Ticks para 200ms
+.equ FREQUENCY, 270000000          # Frequência do sistema em Hz
+.equ TICKS2, (FREQUENCY / 5)	# Ticks para 200ms
 
 # Área de interrupções
-.org    0x100
+.org    0x20
 RTI:
     rdctl   et,     ipending
     beq     et,     r0,     OTHER_EXCEPTIONS
@@ -54,13 +54,12 @@ END_HANDLER:
     eret
 
 
-.org    0x200
+.org    0x100
 EXT_IRQ1:
     ret
 
 
-.org    0x1000
-
+.org    0x1500
 .global ANIMALEDS
 
 /*
@@ -75,11 +74,20 @@ EXT_IRQ1:
     
 */
 ANIMALEDS:
-    movia   sp, 0x4000
-
+    movia    sp, 0x4000
+	# Temporizador
+	movia	r16,	TIMER
+ 
+	# Tratamento para finalizar animação, se r4 = 1
+	beq r4, r0, ANIMALEDS_INICIA
+ANIMALEDS_PARA:
+	# Set STOP de timer
+  	movi	r17,	0b1000	#	STOP=1, START=0, CONT=0, ITO=0
+   	sthio	r17,	4(r16)
+    	br end
+ANIMALEDS_INICIA:
 	# Configurando o temporizador
- 	movia	r16,	TIMER
-	movia	r17,	TICKS	# 1/5 segundos
+	movia	r17,	TICKS2	# 1/5 segundos
  	stwio	r17,	8(r16)	#	0x10002008 - valor baixo
   	srli	r17,	r17,	16
 	stwio	r17,	12(r16)	#	0x1000200C - valor alto
@@ -164,8 +172,7 @@ ANIMALEDS_INTERRUPT:
     addi    r17,    r0, 1
  	stwio	r17,	0(r16)	#	0x10002000 - valor baixo
 
-    # Representa interrupção caso receba sinal de parada
-    bne r4, r0, end                 
+    # bne r4, r0, end                 # Representa implementação em memória caso receba sinal de parada
 
     movia r17, RED_LEDS			    # Inicializando LEDs
     ldwio r20, 0(r17)               # Lê o estado dos leds

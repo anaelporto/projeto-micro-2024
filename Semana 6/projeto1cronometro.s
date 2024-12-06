@@ -12,50 +12,19 @@ r17 - Representa as dezenas do cronômetro
 r18 - Representa as centenas do cronômetro
 r19 - Representa os milhares do cronômetro
 r20 - Representa o limite de 10 para cada componente do cronômetro
-r21 - 
-r22 - 
-r23 - 
+r21 - Armazena endereço do Display de 7 Segmentos
+r22 - Auxiliar para contador e exibição no display
+r23 - Auxiliar para gerenciamento e exibição no display
 
 */
 
 .equ    DISPLAY_BASE,       0x10000020    # Endereço base do display de 7 segmentos
 
-# Área de interrupções
-.org    0x300
-RTI:
-    rdctl   et,     ipending
-    beq     et,     r0,     OTHER_EXCEPTIONS
-    subi    ea,     ea,     4
+.org    0x2000
 
-    # Tratamento
+.global _start
 
- 	# Confere se a interrupção é do timer
-  	andi	r22,	et,	0b1
-	beq		r22,	r0,	OTHER_INTERRUPTS	# mudar para lidar com outros tipos de interrupção
-	call	ANIMALEDS_INTERRUPT
- 	br		END_HANDLER		# avaliar se os dados estão sendo devidamente recuperados
- 
-    # Fim tratamento
-
-    andi    r22,    et,     2
-    beq     r22,    r0,     OTHER_INTERRUPTS
-    # call  EXT_IRQ1
-OTHER_INTERRUPTS:
-    br      END_HANDLER
-OTHER_EXCEPTIONS:
-
-END_HANDLER:
-    eret
-
-.org    0x400
-EXT_IRQ1:
-    ret
-
-.org    0x1500
-
-.global CRONOMETRO
-
-CRONOMETRO:
+_start:
 
     # Inicializa os registradores do cronômetro e o stack pointer
     movia   r16, 0          # Unidades
