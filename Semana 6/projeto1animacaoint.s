@@ -23,7 +23,7 @@ r22 - variável auxiliar para testar os limites inferior e superior
 .equ TIMER,		0X10002000	# Endereço do temporizador
 
 # Constantes para temporizador
-.equ FREQUENCY, 270000000          # Frequência do sistema em Hz
+.equ FREQUENCY, 50000000          # Frequência do sistema em Hz
 .equ TICKS2, (FREQUENCY / 5)	# Ticks para 200ms
 
 # Área de interrupções
